@@ -1,0 +1,17 @@
+.container {
+  text-align: center;
+}
+
+.btn {
+  margin-top: 1%;
+}
+input {
+  width: 200px;
+  height: 20px;
+}
+.img-div {
+  margin-top: 1%;
+}
+.img-div img {
+  width: 100px;
+}

@@ -1,0 +1,11 @@
+<div class="container">
+  <h1 class="title">Credit Card Verification</h1>
+  <div>
+    <input type="text" name="input" #input />
+    <h2 class="checer" *ngIf="valid !== ''; false">{{ valid }}</h2>
+    <div class="img-div" *ngIf="cardImg !== ''; false">
+      <img src="{{ 'assets/' + cardImg }}" />
+    </div>
+  </div>
+  <button class="btn" (click)="validateCard(input.value)">check</button>
+</div>
