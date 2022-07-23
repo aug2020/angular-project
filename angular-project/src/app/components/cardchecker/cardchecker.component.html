@@ -7,21 +7,22 @@
       type="text"
       name="input"
       #input
-      [ngStyle]="{ 'background-color': color }"
+      [ngStyle]="
+        valid.valid
+          ? { 'background-color': valid.color }
+          : { 'background-color': valid.color }
+      "
       value="{{ cardNum }}"
       placeholder="Enter credit card #"
-      (input)="onChange($event)"
     />
     <button class="btn" (click)="validateCard(input.value)">check</button>
   </div>
   <h2
     class="check"
-    *ngIf="valid !== ''; false"
-    [ngStyle]="
-      valid === 'not valid' ? { color: '#ed4337' } : { color: '#32CD32' }
-    "
+    *ngIf="valid.msg !== ''; false"
+    [ngStyle]="valid.valid ? { color: valid.color } : { color: valid.color }"
   >
-    {{ valid }}
+    {{ valid.msg }}
   </h2>
   <div class="img-div" *ngIf="cardImg !== ''; false">
     <img src="{{ 'assets/' + cardImg }}" />

@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { CookieService } from 'ngx-cookie-service';
+import * as CryptoJS from 'crypto-js';
 
 @Component({
   selector: 'app-cardchecker',
@@ -9,67 +10,25 @@ import { CookieService } from 'ngx-cookie-service';
 })
 export class CardcheckerComponent implements OnInit {
   //setting default values that will be altered after credit card number is inputted
-  valid: string = '';
+  valid = { valid: false, msg: '', color: '' };
+
   cardImg: string = '';
-  color: string = '';
   cardNum: string = '';
+
+  //array of regular expressions for each type of credit card
+  regExArray = [
+    { img: 'visa.png', regEx: /^4[0-9]{12,15}$/g },
+    { img: 'mastercard.png', regEx: /^5[0-9]{12,15}$/g },
+    { img: 'a-express.png', regEx: /^37[0-9]{11,14}$/g },
+  ];
 
   constructor(private http: HttpClient, private cookie: CookieService) {}
 
-  ngOnInit(): void {}
-
-  /* Checks whether credit card value is valid or not and stores in backend db
-  @params {string} text
-   */
-  validateCard(number: string) {
-    let cardNum = Number(number);
-
-    // creating 3 regular expressiosn for the 3 types of credit cards
-    let visaRegex = /^4[0-9]{12,15}$/;
-    let masterRegex = /^5[0-9]{12,15}$/;
-    let amerRegex = /^37[0-9]{11,14}$/;
-    //Checking to make sure the enter card number is not an empty string
-    if (cardNum !== 0) {
-      // first check to make sure no strings are entered
-      if (!Number.isNaN(cardNum)) {
-        /*Then we check to see if the credit card number is either
-      a visa, mastercard or american express
-      */
-        if (visaRegex.test(cardNum.toString())) {
-          this.valid = 'valid';
-          this.color = '#32CD32';
-          this.cardImg = 'visa.png';
-        } else if (masterRegex.test(cardNum.toString())) {
-          this.valid = 'valid';
-          this.color = '#32CD32';
-          this.cardImg = 'mastercard.png';
-        } else if (amerRegex.test(cardNum.toString())) {
-          this.valid = 'valid';
-          this.color = '#32CD32';
-          this.cardImg = 'a-express.png';
-        } else {
-          this.cardImg = '';
-          this.valid = 'not valid';
-          this.color = '#ed4337';
-        }
-        //submitting card number into in memory
-      } else {
-        this.valid = 'not valid';
-        this.cardImg = '';
-        this.color = '#ed4337';
-      }
-      this.http
-        .get(`http://localhost:8080/submitCard?cardNumber=${number}`, {
-          responseType: 'text',
-        })
-        .subscribe();
-    } else {
-      this.valid = '';
-      this.cardImg = '';
-      this.color = '';
-    }
-
-    //checking to make sure entered number is not an empty string before submitting
+  ngOnInit(): void {
+    this.cardNum = CryptoJS.AES.decrypt(
+      this.cookie.get('num'),
+      'creditcardvalidator1755'
+    ).toString(CryptoJS.enc.Utf8);
   }
 
   /**
@@ -77,10 +36,51 @@ export class CardcheckerComponent implements OnInit {
    * @param value
    */
   setCookie(value: string) {
-    this.cookie.set('num', value);
+    //using cryptojs to encrypted credit card number in session cookie
+
+    var encryptedString = CryptoJS.AES.encrypt(
+      value,
+      'creditcardvalidator1755'
+    ).toString();
+    this.cookie.set('num', encryptedString);
   }
 
-  onChange(event: any) {
-    console.log(event);
+  /**
+   * Checks whether credit card value is valid or not and stores in backend db
+   * @param number
+   */
+  validateCard(number: string) {
+    //regular expression to check if value enter is only numbers
+    let regEx = /^[0-9]{1,}$/g;
+
+    if (regEx.test(number)) {
+      //searching for the corresponding credit card
+      var val = this.regExArray.find((e) => {
+        return number.match(e.regEx) !== null;
+      });
+      if (val !== undefined) {
+        this.valid = {
+          valid: true,
+          msg: 'Card number is valid',
+          color: '#32CD32',
+        };
+        this.cardImg = val.img;
+      } else {
+        this.valid = {
+          valid: false,
+          msg: 'Card number not valid',
+          color: '#ed4337',
+        };
+        this.cardImg = '';
+      }
+    } else {
+      this.valid = {
+        valid: false,
+        msg: 'Card number not valid',
+        color: '#ed4337',
+      };
+    }
+    this.setCookie(number);
+    //checking to make sure entered number is not an empty string before submitting
   }
 }
