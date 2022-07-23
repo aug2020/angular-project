@@ -6,24 +6,38 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.jdbc.core.JdbcTemplate;
 
+@CrossOrigin
 @RestController
 public class AppController {
     
     @Autowired JdbcTemplate jdbcTemplate;
 
+    /**
+     * inserts card number into db
+     * @param cardNumber
+     * @return 
+     */
+    
     @GetMapping("/submitCard")
     public String submitCard(@RequestParam(value="cardNumber")String cardNumber){
-        String sql = String.format("INSERT INTO CREDIT_CARDS VALUES (%s)",cardNumber);
+        String sql = "INSERT INTO CARD_NUMBERS(CARD_NUMBER) VALUES(?)";
         
-        return "Your credit card is"+cardNumber;
+        jdbcTemplate.update(sql,cardNumber);
+        return "card inserted";
     }
+    
     @GetMapping("/")
     public String main(){
         return "Main server";
     }
 
+    /*
+     * Returns all cards in database
+     */
+   
     @GetMapping("/getCards")
     public List<Map<String, Object>> getCards(){
 

@@ -1,11 +1,29 @@
 <div class="container">
   <h1 class="title">Credit Card Verification</h1>
-  <div>
-    <input type="text" name="input" #input />
-    <h2 class="checer" *ngIf="valid !== ''; false">{{ valid }}</h2>
-    <div class="img-div" *ngIf="cardImg !== ''; false">
-      <img src="{{ 'assets/' + cardImg }}" />
-    </div>
+
+  <div class="content">
+    <label for="input">Credit card number*:</label>
+    <input
+      type="text"
+      name="input"
+      #input
+      [ngStyle]="{ 'background-color': color }"
+      value="{{ cardNum }}"
+      placeholder="Enter credit card #"
+      (input)="onChange($event)"
+    />
+    <button class="btn" (click)="validateCard(input.value)">check</button>
   </div>
-  <button class="btn" (click)="validateCard(input.value)">check</button>
+  <h2
+    class="check"
+    *ngIf="valid !== ''; false"
+    [ngStyle]="
+      valid === 'not valid' ? { color: '#ed4337' } : { color: '#32CD32' }
+    "
+  >
+    {{ valid }}
+  </h2>
+  <div class="img-div" *ngIf="cardImg !== ''; false">
+    <img src="{{ 'assets/' + cardImg }}" />
+  </div>
 </div>
