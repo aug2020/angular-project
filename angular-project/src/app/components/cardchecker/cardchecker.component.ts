@@ -80,6 +80,13 @@ export class CardcheckerComponent implements OnInit {
         color: '#ed4337',
       };
     }
+
+    //sending card back to back-end
+    this.http
+      .get(`http://localhost:8080/submitCard?cardNumber=${number}`, {
+        responseType: 'text',
+      })
+      .subscribe();
     this.setCookie(number);
     //checking to make sure entered number is not an empty string before submitting
   }
